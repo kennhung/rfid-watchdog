@@ -1,0 +1,8 @@
+void setupMFRC522Reader(int rfidss, int rfidgain) {
+	SPI.begin();                         
+	mfrc522.PCD_Init(rfidss, UINT8_MAX); 
+	
+	mfrc522.PCD_SetAntennaGain(rfidgain);
+	Serial.printf("[ INFO ] RFID SS_PIN: %u and Gain Factor: %u", rfidss, rfidgain);
+	Serial.println("");
+}

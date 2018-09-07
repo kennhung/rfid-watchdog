@@ -1,0 +1,24 @@
+bool loadConfig(void) {
+    File configFile = SPIFFS.open("/config.json", "r");
+
+    if (!configFile) {
+        Log.warning("[FILE] Failed to open config file");
+		return false;
+	}
+
+    size_t size = configFile.size();
+	std::unique_ptr<char[]> buf(new char[size]);
+	configFile.readBytes(buf.get(), size);
+	DynamicJsonBuffer jsonBuffer;
+	JsonObject &json = jsonBuffer.parseObject(buf.get());
+    
+
+
+    char ssid[] = "";
+    char pass[] = "";
+
+
+    //set up rfid part
+    setupMFRC522Reader(8, 10);
+    return startAP(0, "rfid-watchdog", "abc123456789");    
+}
