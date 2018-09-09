@@ -1,18 +1,41 @@
-bool connWatcher(const char* host, int port){
-    if(dogClient.connect(host,port)){
-        Log.notice("[WatcherClient] Connected to %s:%d\n",host,port);
+bool connWatcher(const char* host, int port) {
+    if (dogClient.connect(host, port)) {
+        Log.notice("[WatcherClient] Connected to %s:%d\n", host, port);
         return true;
-    }
-    else{
-        Log.warning("[WatcherClient] Can't connect to %s:%d\n",host,port);
+    } else {
+        Log.warning("[WatcherClient] Can't connect to %s:%d\n", host, port);
         return false;
     }
 }
 
-void updateWatcherConn(void){
+void updateWatcherConn(void) {
     watchercooldown = millis() + 5000;
     isWatcherConnected = dogClient.connected();
-    if(!isWatcherConnected){
+    if (!isWatcherConnected) {
         isWatcherConnected = connWatcher("192.168.4.2", 6083);
     }
+}
+
+bool checkAccess(const char* uid, int door) {
+    String jsonData = "";
+    jsonData += "{'doorId':";
+    jsonData += door;
+    jsonData += ",'uid':'";
+    jsonData += uid;
+    jsonData += "'};";
+
+    dogClient.print(jsonData);
+
+    long timeOut = millis();
+    String readIn;
+    while (millis() - timeOut < 5000) {
+        if (dogClient.available()) {
+            readIn = dogClient.readStringUntil(';');
+        }
+    }
+
+    DynamicJsonBuffer jsonBuffer;
+    JsonObject& readJson =  jsonBuffer.parseObject(readIn);
+
+    return readJson["open"];
 }

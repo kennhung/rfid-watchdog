@@ -26,9 +26,19 @@ void rfidloop() {
         uid += String(mfrc522.uid.uidByte[i], HEX);
     }
 
+    uid.toUpperCase();
+
     MFRC522::PICC_Type piccType = mfrc522.PICC_GetType(mfrc522.uid.sak);
     type = mfrc522.PICC_GetTypeName(piccType);
 
-    Log.notice("[RFID] PICC's UID: %s ", uid.c_str());
-	Log.notice(", Type: %s\n", type.c_str());
+    Log.notice("[RFID] PICC's UID: %s , Type:x %s\n", uid.c_str(), type.c_str());
+
+    bool open = checkAccess(uid.c_str(), doorId);
+
+    if (open) {
+        Log.notice("open\n");
+    }
+    else{
+        Log.notice("close\n");
+    }
 }

@@ -8,6 +8,7 @@
 
 #define DEBUG
 
+const int doorId = 1;
 const char verTag[] = "beta 1.0";
 
 #include <LiquidCrystal_I2C.h>
@@ -29,10 +30,9 @@ unsigned long passMillis = 0;
 unsigned long cooldown = 0;
 unsigned long watchercooldown = 0;
 
-
-#include "dogFiles/rfid.dog"
 #include "dogFiles/watcher.dog"
 #include "dogFiles/wifi.dog"
+#include "dogFiles/rfid.dog"
 #include "dogFiles/config.dog"
 
 void setup() {
@@ -65,7 +65,7 @@ void loop() {
     if (currentMillis >= cooldown) {
         rfidloop();
     }
-    
+
     if(currentMillis >= watchercooldown){
         updateWatcherConn();
     }
