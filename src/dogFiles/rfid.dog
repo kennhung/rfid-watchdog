@@ -35,10 +35,7 @@ void rfidloop() {
 
     bool open = checkAccess(uid.c_str(), doorId);
 
-    if (open) {
-        Log.notice("open\n");
-    }
-    else{
-        Log.notice("close\n");
+    if(open){
+        
     }
 }

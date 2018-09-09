@@ -36,6 +36,10 @@ bool checkAccess(const char* uid, int door) {
 
     DynamicJsonBuffer jsonBuffer;
     JsonObject& readJson =  jsonBuffer.parseObject(readIn);
+    
+    String name = readJson["name"];
+    
+    Log.trace("[User] %s access", name.c_str());
 
     return readJson["open"];
 }
