@@ -2,8 +2,8 @@ bool loadConfig(void) {
     File configFile = SPIFFS.open("/config.json", "r");
 
     if (!configFile) {
-        Log.warning("[FILE] Failed to open config file");
-		return false;
+        Log.warning("[FILE] Failed to open config file\n");
+		// return false;
 	}
 
     size_t size = configFile.size();
@@ -19,6 +19,6 @@ bool loadConfig(void) {
 
 
     //set up rfid part
-    setupMFRC522Reader(8, 10);
-    return startAP(0, "rfid-watchdog", "abc123456789");    
+    setupMFRC522Reader(15, 112);
+    return startAP(0, "rfid-watchdog", "abc123456789");  
 }
