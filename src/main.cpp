@@ -17,15 +17,21 @@ const char verTag[] = "beta 1.0";
 MFRC522 mfrc522 = MFRC522();
 LiquidCrystal_I2C lcd(0x3F, 20, 4);
 
+WiFiClient dogClient;
+
 bool isWifiConnected = false;
 bool inAPMode = false;
+bool isWatcherConnected = false;
+
 unsigned long currentMillis = 0;
 unsigned long prevMillis = 0;
 unsigned long passMillis = 0;
 unsigned long cooldown = 0;
+unsigned long watchercooldown = 0;
 
 
 #include "dogFiles/rfid.dog"
+#include "dogFiles/watcher.dog"
 #include "dogFiles/wifi.dog"
 #include "dogFiles/config.dog"
 
@@ -60,5 +66,8 @@ void loop() {
         rfidloop();
     }
     
+    if(currentMillis >= watchercooldown){
+        updateWatcherConn();
+    }
     
 }

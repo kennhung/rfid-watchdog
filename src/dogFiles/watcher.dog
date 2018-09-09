@@ -1,0 +1,18 @@
+bool connWatcher(const char* host, int port){
+    if(dogClient.connect(host,port)){
+        Log.notice("[WatcherClient] Connected to %s:%d\n",host,port);
+        return true;
+    }
+    else{
+        Log.warning("[WatcherClient] Can't connect to %s:%d\n",host,port);
+        return false;
+    }
+}
+
+void updateWatcherConn(void){
+    watchercooldown = millis() + 5000;
+    isWatcherConnected = dogClient.connected();
+    if(!isWatcherConnected){
+        isWatcherConnected = connWatcher("192.168.4.2", 6083);
+    }
+}
