@@ -11,6 +11,10 @@
 const int doorId = 1;
 const char verTag[] = "beta 1.0";
 
+int relayPin = 16;
+int relayType = 0;
+unsigned long relayActiveTime = 3500;
+
 #include <LiquidCrystal_I2C.h>
 #include <MFRC522.h>
 #include "pitch.h"
@@ -22,16 +26,23 @@ WiFiClient dogClient;
 
 bool isWifiConnected = false;
 bool inAPMode = false;
+bool inStationMode = false;
 bool isWatcherConnected = false;
+bool activateRelay = false;
 
 unsigned long currentMillis = 0;
 unsigned long prevMillis = 0;
 unsigned long passMillis = 0;
 unsigned long cooldown = 0;
 unsigned long watchercooldown = 0;
+unsigned long relayActiveMillis = 0;
+unsigned long wifiCheckCooldown = 0;
+
+int stationConnected = 0;
 
 #include "dogFiles/watcher.dog"
 #include "dogFiles/wifi.dog"
+#include "dogFiles/control.dog"
 #include "dogFiles/rfid.dog"
 #include "dogFiles/config.dog"
 
@@ -69,5 +80,8 @@ void loop() {
     if(currentMillis >= watchercooldown){
         updateWatcherConn();
     }
-    
+
+    if((millis() - relayActiveMillis >= relayActiveTime) && activateRelay){
+        deactiveRelay();
+    }
 }

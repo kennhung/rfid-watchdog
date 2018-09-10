@@ -1,0 +1,12 @@
+void activeRelay() {
+    Log.trace("[Relay] activating relay on %l\n", millis());
+    digitalWrite(relayPin, !relayType);
+    relayActiveMillis = millis();
+    activateRelay = true;
+}
+
+void deactiveRelay() {
+    Log.trace("[Relay] relay deactivate on %l\n", millis());
+    digitalWrite(relayPin, relayType);
+    activateRelay = false;
+}

@@ -1,54 +1,76 @@
-bool ICACHE_FLASH_ATTR startAP(int hid, const char *ssid, const char *password = NULL) {
-	inAPMode = true;
-	WiFi.mode(WIFI_AP);
-    Log.notice("[WIFI] Configuring access point...\n");
-    
-	bool success;
-	if (hid == 1) {
-		success = WiFi.softAP(ssid, password, 3, true);
-	} else {
-		success = WiFi.softAP(ssid, password);
-	}
-    Log.notice("%s\n",success ? "Ready" : "Failed!");
+void updateWifiStatus() {
+    wifiCheckCooldown = millis() + 10000;
+    if (inStationMode) {
+        if (WiFi.status() == WL_CONNECTED) {
+            isWifiConnected = true;
+        } else {
+            Log.warning("[WIFI] connection broke\n");
+			WiFi.printDiag(Serial);
+            isWifiConnected = false;
+        }
+    } else if (inAPMode) {
+        if(stationConnected != WiFi.softAPgetStationNum()){
+			Log.notice("[WiFI] current %d station connected to soft-ap\n",WiFi.softAPgetStationNum());
+		}
+    }
+}
 
-	if (!success) {
-		ESP.restart();
-	}
+bool ICACHE_FLASH_ATTR startAP(int hid, const char *ssid,
+                               const char *password = NULL) {
+    inAPMode = true;
+    WiFi.mode(WIFI_AP);
+    Log.notice("[WIFI] Configuring access point...\n");
+
+    bool success;
+    if (hid == 1) {
+        success = WiFi.softAP(ssid, password, 3, true);
+    } else {
+        success = WiFi.softAP(ssid, password);
+    }
+    Log.notice("%s\n", success ? "Ready" : "Failed!");
+
+    if (!success) {
+        ESP.restart();
+    }
 
     IPAddress myIP = WiFi.softAPIP();
     Log.notice("[WIFI] AP IP address: %s\n", myIP.toString().c_str());
     Log.notice("[WIFI] AP SSID: %s\n", ssid);
 
-	isWifiConnected = success;
-	return success;
+    isWifiConnected = success;
+    return success;
 }
 
-bool connectSTA(const char *ssid, const char *password, byte bssid[6]) {
-	WiFi.mode(WIFI_STA);
-	WiFi.begin(ssid, password, 0, bssid);
-
+bool connectSTA(const char *ssid, const char *password) {
+    WiFi.mode(WIFI_STA);
+    WiFi.begin(ssid, password, 0);
+    inStationMode = true;
+    // TODO add bssid
     Log.notice("[WIFI] Trying to connect WiFi: %s", ssid);
-	unsigned long now = millis();
-	uint8_t timeout = 20; // define when to time out in seconds
-	do {
-		if (WiFi.status() == WL_CONNECTED) {
-			break;
-		}
-		delay(500);
+    unsigned long now = millis();
+    uint8_t timeout = 30;  // define when to time out in seconds
+    do {
+        if (WiFi.status() == WL_CONNECTED) {
+            break;
+        }
+        delay(500);
 #ifdef DEBUG
-		Serial.print(F("."));
+        Serial.print(F("."));
 #endif
-	} while (millis() - now < timeout * 1000);
-	
-	if (WiFi.status() == WL_CONNECTED) {
-        Log.notice("[WIFI] Client IP address: %s", WiFi.localIP().toString().c_str());
-		isWifiConnected = true;
-		String data = ssid;
-		data += " " + WiFi.localIP().toString();
-		// writeEvent("INFO", "wifi", "WiFi is connected", data);
-		return true;
-	} else {
-		Log.error("[WIFI] Couldn't connect in time");
-		return false;
-	}
+    } while (millis() - now < timeout * 1000);
+
+    if (WiFi.status() == WL_CONNECTED) {
+        Log.notice("[WIFI] Client IP address: %s\n",
+                   WiFi.localIP().toString().c_str());
+        isWifiConnected = true;
+        WiFi.setAutoReconnect(true);
+
+        String data = ssid;
+        data += " " + WiFi.localIP().toString();
+        // writeEvent("INFO", "wifi", "WiFi is connected", data);
+        return true;
+    } else {
+        Log.error("[WIFI] Couldn't connect in time\n");
+        return false;
+    }
 }

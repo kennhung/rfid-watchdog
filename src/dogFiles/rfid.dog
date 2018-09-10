@@ -1,11 +1,35 @@
+void ShowMFRC522ReaderDetails() {
+    // Get the MFRC522 software version
+    byte v = mfrc522.PCD_ReadRegister(mfrc522.VersionReg);
+    String vers;
+
+    if (v == 0x91) {
+        vers = " = v1.0";
+    } else if (v == 0x92) {
+        vers = " = v2.0";
+    } else if (v == 0x88) {
+        vers = " = clone";
+    } else {
+        vers = " (unknow)";
+    }
+    Log.verbose("[INFO] MFRC522 Version: 0x%x %s\n", v, vers.c_str());
+    // When 0x00 or 0xFF is returned, communication probably failed
+    if ((v == 0x00) || (v == 0xFF)) {
+        Log.error(
+            "[RFID] Communication failure, check if MFRC522 properly "
+            "\"connected\"");
+    }
+}
+
 void setupMFRC522Reader(int rfidss, int rfidgain) {
     SPI.begin();
     mfrc522.PCD_Init(rfidss, UINT8_MAX);
 
     mfrc522.PCD_SetAntennaGain(rfidgain);
-    Serial.printf("[ INFO ] RFID SS_PIN: %u and Gain Factor: %u", rfidss,
-                  rfidgain);
-    Serial.println("");
+    Log.notice("[INFO] RFID SS_PIN: %u and Gain Factor: %u\n", rfidss,
+               rfidgain);
+
+    ShowMFRC522ReaderDetails();
 }
 
 void rfidloop() {
@@ -31,11 +55,12 @@ void rfidloop() {
     MFRC522::PICC_Type piccType = mfrc522.PICC_GetType(mfrc522.uid.sak);
     type = mfrc522.PICC_GetTypeName(piccType);
 
-    Log.notice("[RFID] PICC's UID: %s , Type:x %s\n", uid.c_str(), type.c_str());
+    Log.notice("[RFID] PICC's UID: %s , Type:x %s\n", uid.c_str(),
+               type.c_str());
 
     bool open = checkAccess(uid.c_str(), doorId);
 
-    if(open){
-        
+    if (open) {
+        activeRelay();
     }
 }

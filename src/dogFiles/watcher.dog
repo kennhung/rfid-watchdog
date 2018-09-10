@@ -12,7 +12,7 @@ void updateWatcherConn(void) {
     watchercooldown = millis() + 5000;
     isWatcherConnected = dogClient.connected();
     if (!isWatcherConnected) {
-        isWatcherConnected = connWatcher("192.168.4.2", 6083);
+        isWatcherConnected = connWatcher("192.168.1.4", 6083);
     }
 }
 
@@ -26,20 +26,16 @@ bool checkAccess(const char* uid, int door) {
 
     dogClient.print(jsonData);
 
-    long timeOut = millis();
     String readIn;
-    while (millis() - timeOut < 5000) {
-        if (dogClient.available()) {
-            readIn = dogClient.readStringUntil(';');
-        }
-    }
+    readIn = dogClient.readStringUntil(';');
 
     DynamicJsonBuffer jsonBuffer;
-    JsonObject& readJson =  jsonBuffer.parseObject(readIn);
-    
+    JsonObject& readJson = jsonBuffer.parseObject(readIn);
+
     String name = readJson["name"];
-    
-    Log.trace("[User] %s access", name.c_str());
+
+    Log.trace("[User] %s access %s\n", name.c_str(),
+              readJson["open"] ? "granted" : "denied");
 
     return readJson["open"];
 }
