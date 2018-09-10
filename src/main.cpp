@@ -84,4 +84,8 @@ void loop() {
     if((millis() - relayActiveMillis >= relayActiveTime) && activateRelay){
         deactiveRelay();
     }
+
+    if(currentMillis >= wifiCheckCooldown){
+        updateWifiStatus();
+    }
 }
