@@ -18,7 +18,7 @@ void updateWatcherConn(void) {
 
 bool checkAccess(const char* uid, int door) {
     String jsonData = "";
-    jsonData += "{'doorId':";
+    jsonData += "{'type':3 ,'doorId':";
     jsonData += door;
     jsonData += ",'uid':'";
     jsonData += uid;
@@ -29,6 +29,7 @@ bool checkAccess(const char* uid, int door) {
     String readIn;
     readIn = dogClient.readStringUntil(';');
 
+    Log.verbose("%s\n",readIn.c_str());
     DynamicJsonBuffer jsonBuffer;
     JsonObject& readJson = jsonBuffer.parseObject(readIn);
 
