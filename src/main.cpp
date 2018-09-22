@@ -17,6 +17,7 @@ unsigned long relayActiveTime = 3500;
 
 #include <LiquidCrystal_I2C.h>
 #include <MFRC522.h>
+#include "messageType.h"
 #include "pitch.h"
 
 MFRC522 mfrc522 = MFRC522();
@@ -40,19 +41,22 @@ unsigned long wifiCheckCooldown = 0;
 
 int stationConnected = 0;
 
-#include "dogFiles/watcher.dog"
-#include "dogFiles/wifi.dog"
+
 #include "dogFiles/control.dog"
+#include "dogFiles/watcher.dog"
 #include "dogFiles/rfid.dog"
+#include "dogFiles/wifi.dog"
 #include "dogFiles/config.dog"
 
 void setup() {
     Serial.begin(9600);
+    if (Serial) {
 #ifdef DEBUG
-    Log.begin(LOG_LEVEL_VERBOSE, &Serial);
+        Log.begin(LOG_LEVEL_VERBOSE, &Serial);
 #else
-    Log.begin(LOG_LEVEL_SILENT, &Serial);
+        Log.begin(LOG_LEVEL_SILENT, &Serial);
 #endif
+    }
     Log.notice("[BOOT] wifi-watchdog %s\n", verTag);
 
     if (!SPIFFS.begin()) {
@@ -77,15 +81,34 @@ void loop() {
         rfidloop();
     }
 
-    if(currentMillis >= watchercooldown){
+    if (currentMillis >= watchercooldown) {
         updateWatcherConn();
     }
 
-    if((millis() - relayActiveMillis >= relayActiveTime) && activateRelay){
+    if ((millis() - relayActiveMillis >= relayActiveTime) && activateRelay) {
         deactiveRelay();
     }
 
-    if(currentMillis >= wifiCheckCooldown){
+    if (currentMillis >= wifiCheckCooldown) {
         updateWifiStatus();
+    }
+
+    if (isWatcherConnected) {
+        if (dogClient.available() > 0) {
+            String readIn = dogClient.readStringUntil(';');
+            Log.verbose("[dogClient] %s\n", readIn.c_str());
+            DynamicJsonBuffer jsonBuffer;
+            JsonObject& readJson = jsonBuffer.parseObject(readIn);
+
+            int type = readJson["type"];
+            switch (type) {
+                case 2:
+                    String reply = "{'type':";
+                    reply += 5;
+                    reply += "};";
+                    dogClient.print(reply);
+                    break;
+            }
+        }
     }
 }

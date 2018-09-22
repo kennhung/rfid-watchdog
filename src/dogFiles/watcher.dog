@@ -32,11 +32,13 @@ bool checkAccess(const char* uid, int door) {
     Log.verbose("%s\n",readIn.c_str());
     DynamicJsonBuffer jsonBuffer;
     JsonObject& readJson = jsonBuffer.parseObject(readIn);
-
-    String name = readJson["name"];
+    String reply = readJson["reply"];
+    
+    JsonObject& replyJson = jsonBuffer.parseObject(reply);
+    String name = replyJson["name"];
 
     Log.trace("[User] %s access %s\n", name.c_str(),
-              readJson["open"] ? "granted" : "denied");
+              replyJson["open"] ? "granted" : "denied");
 
-    return readJson["open"];
+    return replyJson["open"];
 }
