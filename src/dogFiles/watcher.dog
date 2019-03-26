@@ -29,12 +29,15 @@ bool checkAccess(const char* uid, int door) {
     String readIn;
     readIn = dogClient.readStringUntil(';');
 
-    Log.verbose("%s\n",readIn.c_str());
-    DynamicJsonBuffer jsonBuffer;
-    JsonObject& readJson = jsonBuffer.parseObject(readIn);
+    Log.verbose("%s\n", readIn.c_str());
+    DynamicJsonDocument readJson(1024);
+    deserializeJson(readJson, readIn);
+
     String reply = readJson["reply"];
-    
-    JsonObject& replyJson = jsonBuffer.parseObject(reply);
+
+    DynamicJsonDocument replyJson(1024);
+    deserializeJson(replyJson, reply);
+
     String name = replyJson["name"];
 
     Log.trace("[User] %s access %s\n", name.c_str(),

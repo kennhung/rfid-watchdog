@@ -3,8 +3,10 @@
 #include <ArduinoLog.h>
 #include <ESP8266WiFi.h>
 #include <FS.h>
+#include <NtpClientLib.h>
 #include <SPI.h>
 #include <Wire.h>
+#include <stdlib.h>
 
 #define DEBUG
 
@@ -13,7 +15,12 @@ const char verTag[] = "beta 1.0";
 
 int relayPin = 16;
 int relayType = 0;
+int timeZone;
+int buttonPin = 255;
 unsigned long relayActiveTime = 3500;
+
+#define LEDoff HIGH
+#define LEDon LOW
 
 #include <LiquidCrystal_I2C.h>
 #include <MFRC522.h>
@@ -30,6 +37,10 @@ bool inAPMode = false;
 bool inStationMode = false;
 bool isWatcherConnected = false;
 bool activateRelay = false;
+bool isNTPInited = false;
+unsigned long autoRestartIntervalSeconds = 0;
+unsigned long wifiTimeout = 0;
+char* deviceHostname = NULL;
 
 unsigned long currentMillis = 0;
 unsigned long prevMillis = 0;
@@ -41,11 +52,16 @@ unsigned long wifiCheckCooldown = 0;
 
 int stationConnected = 0;
 
+boolean syncEventTriggered = false;  // True if a time even has been triggered
+NTPSyncEvent_t ntpEvent;             // Last triggered event
 
 #include "dogFiles/control.dog"
 #include "dogFiles/watcher.dog"
+#include "dogFiles/ntp.dog"
 #include "dogFiles/rfid.dog"
+#include "dogFiles/utils.dog"
 #include "dogFiles/wifi.dog"
+
 #include "dogFiles/config.dog"
 
 void setup() {
@@ -69,7 +85,13 @@ void setup() {
         }
     }
 
-    loadConfig();
+    NTP.onNTPSyncEvent([](NTPSyncEvent_t event) {
+        ntpEvent = event;
+        syncEventTriggered = true;
+    });
+
+    if (!loadConfig()) {
+    }
 }
 
 void loop() {
@@ -93,12 +115,23 @@ void loop() {
         updateWifiStatus();
     }
 
+    if (isWifiConnected && !isNTPInited) {
+        isNTPInited = true;
+        NTP.begin("pool.ntp.org", timeZone, true, 0);
+        NTP.setInterval(63);
+    }
+
+    if (syncEventTriggered) {
+        processSyncEvent(ntpEvent);
+        syncEventTriggered = false;
+    }
+
     if (isWatcherConnected) {
         if (dogClient.available() > 0) {
             String readIn = dogClient.readStringUntil(';');
             Log.verbose("[dogClient] %s\n", readIn.c_str());
-            DynamicJsonBuffer jsonBuffer;
-            JsonObject& readJson = jsonBuffer.parseObject(readIn);
+            DynamicJsonDocument readJson(1024);
+            deserializeJson(readJson, readIn);
 
             int type = readJson["type"];
             switch (type) {
