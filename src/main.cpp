@@ -8,31 +8,33 @@
 #include <Wire.h>
 #include <stdlib.h>
 
-#define DEBUG
-
-const int doorId = 1;
-const char verTag[] = "beta 1.0";
-
-int wifipin = 255;
-int relayPin = 16;
-int relayType = 0;
-int timeZone;
-int buttonPin = 255;
-unsigned long relayActiveTime = 3500;
-
-#define LEDoff HIGH
-#define LEDon LOW
-
 #include <LiquidCrystal_I2C.h>
 #include <MFRC522.h>
 #include "messageType.h"
 #include "pitch.h"
 
+#define DEBUG
+
+const int doorId = 1;
+const char verTag[] = "beta 1.0";
+
+// io pins
+int wifipin = 255;
+int relayPin = 16;
+int relayType = 0;
+int buttonPin = 255;
+
+#define LEDoff HIGH
+#define LEDon LOW
+
 MFRC522 mfrc522 = MFRC522();
 LiquidCrystal_I2C lcd(0x3F, 20, 4);
-
 WiFiClient dogClient;
 
+boolean syncEventTriggered = false;  // True if a time even has been triggered
+NTPSyncEvent_t ntpEvent;             // Last triggered event
+
+// Variables for whole scope
 bool isWifiConnected = false;
 bool inAPMode = false;
 bool inStationMode = false;
@@ -40,24 +42,25 @@ bool isWatcherConnected = false;
 bool activateRelay = false;
 bool isNTPInited = false;
 bool shouldReboot = false;
+
 unsigned long autoRestartIntervalSeconds = 0;
 unsigned long wifiTimeout = 0;
 char* deviceHostname = NULL;
 
 unsigned long currentMillis = 0;
 unsigned long prevMillis = 0;
-unsigned long passMillis = 0;
-unsigned long cooldown = 0;
 unsigned long deltaTime = 0;
 unsigned long uptime = 0;
+
+unsigned long cooldown = 0;
 unsigned long watchercooldown = 0;
 unsigned long relayActiveMillis = 0;
 unsigned long wifiCheckCooldown = 0;
 
-int stationConnected = 0;
+int connectedStationCount = 0;
+int timeZone;
 
-boolean syncEventTriggered = false;  // True if a time even has been triggered
-NTPSyncEvent_t ntpEvent;             // Last triggered event
+unsigned long relayActiveTime = 3500;
 
 #include "dogFiles/control.dog"
 #include "dogFiles/watcher.dog"
@@ -100,8 +103,10 @@ void setup() {
 
 void loop() {
     currentMillis = millis();
-    passMillis = currentMillis - prevMillis;
-    prevMillis = currentMillis;
+    deltaTime = currentMillis - prevMillis;
+    prevMillis = currentMillis; 
+
+    uptime = millis() / 1000;
 
     if (currentMillis >= cooldown) {
         rfidloop();

@@ -9,9 +9,10 @@ void updateWifiStatus() {
             isWifiConnected = false;
         }
     } else if (inAPMode) {
-        if (stationConnected != WiFi.softAPgetStationNum()) {
+        if (connectedStationCount != WiFi.softAPgetStationNum()) {
             Log.notice("[WiFI] current %d station connected to soft-ap\n",
                        WiFi.softAPgetStationNum());
+            connectedStationCount = WiFi.softAPgetStationNum();
         }
     }
 }
