@@ -55,13 +55,14 @@ bool ICACHE_FLASH_ATTR startAP(int hid, const char *ssid,
 // connection
 void ICACHE_FLASH_ATTR fallbacktoAPMode() {
     inAPMode = true;
-#ifdef DEBUG
-    Serial.println(F("[ INFO ] ESP-RFID is running in Fallback AP Mode"));
-#endif
+    Log.notice("ESP-RFID is running in Fallback AP Mode");
     uint8_t macAddr[6];
+
     WiFi.softAPmacAddress(macAddr);
+
     char ssid[15];
     sprintf(ssid, "ESP-RFID-%02x%02x%02x", macAddr[3], macAddr[4], macAddr[5]);
+    
     WiFi.mode(WIFI_AP);
     bool success;
     success = WiFi.softAP(ssid);

@@ -98,6 +98,7 @@ void setup() {
     });
 
     if (!loadConfig()) {
+        fallbacktoAPMode();
     }
 }
 
@@ -112,7 +113,7 @@ void loop() {
         rfidloop();
     }
 
-    if (currentMillis >= watchercooldown) {
+    if (currentMillis >= watchercooldown && !inAPMode) {
         updateWatcherConn();
     }
 
