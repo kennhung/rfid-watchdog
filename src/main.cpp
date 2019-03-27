@@ -13,6 +13,7 @@
 const int doorId = 1;
 const char verTag[] = "beta 1.0";
 
+int wifipin = 255;
 int relayPin = 16;
 int relayType = 0;
 int timeZone;
@@ -38,6 +39,7 @@ bool inStationMode = false;
 bool isWatcherConnected = false;
 bool activateRelay = false;
 bool isNTPInited = false;
+bool shouldReboot = false;
 unsigned long autoRestartIntervalSeconds = 0;
 unsigned long wifiTimeout = 0;
 char* deviceHostname = NULL;
@@ -46,6 +48,8 @@ unsigned long currentMillis = 0;
 unsigned long prevMillis = 0;
 unsigned long passMillis = 0;
 unsigned long cooldown = 0;
+unsigned long deltaTime = 0;
+unsigned long uptime = 0;
 unsigned long watchercooldown = 0;
 unsigned long relayActiveMillis = 0;
 unsigned long wifiCheckCooldown = 0;
@@ -119,6 +123,16 @@ void loop() {
         isNTPInited = true;
         NTP.begin("pool.ntp.org", timeZone, true, 0);
         NTP.setInterval(63);
+    }
+
+    if (autoRestartIntervalSeconds > 0 &&
+        uptime > autoRestartIntervalSeconds * 1000) {
+        shouldReboot = true;
+    }
+
+    if (shouldReboot) {
+        Log.notice("[sys] System is going to reboot");
+        ESP.restart();
     }
 
     if (syncEventTriggered) {
