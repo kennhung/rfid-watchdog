@@ -1,6 +1,31 @@
+void authWatcher() {
+    String send = "";
+    send += "{type: ";
+    send += W_AUTH;
+    send += ", auth_token:\"";
+    send += doorAuthToken;
+    send += "\", id:";
+    send += doorId;
+    send += "};";
+    dogClient.print(send);
+
+    String readIn;
+    readIn = dogClient.readStringUntil(';');
+
+    DynamicJsonDocument readJson(1024);
+    deserializeJson(readJson, readIn);
+
+    if(readJson["type"] == W_UNAUTHORIZED){
+        Log.warning("[WatcherClient] Auth fail!\n");
+    } else {
+        Log.notice("[WatcherClient] Auth success\n");
+    }
+}
+
 bool connWatcher(const char* host, int port) {
     if (dogClient.connect(host, port)) {
         Log.notice("[WatcherClient] Connected to %s:%d\n", host, port);
+        authWatcher();
         return true;
     } else {
         Log.warning("[WatcherClient] Can't connect to %s:%d\n", host, port);
@@ -64,8 +89,8 @@ void handleWatchDogServerRequest(String readIn) {
 
     String reply = "{type:";
     reply += replyType;
-    reply +=  ", message: \"";
+    reply += ", message: \"";
     reply += replyMsg;
-    reply +=  + "\"};"; 
+    reply += +"\"};";
     dogClient.print(reply);
 }

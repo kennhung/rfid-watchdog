@@ -43,7 +43,7 @@ bool loadConfig(void) {
     if (hardware.containsKey("rtime")) {
         relayActiveTime = hardware["rtime"];
     }
-    
+
     pinMode(relayPin, OUTPUT);
     digitalWrite(relayPin, !relayType);
 
@@ -95,6 +95,7 @@ bool loadConfig(void) {
     watchdogServer = strdup(watchdog["server"]);
     watchdogPort = watchdog["port"];
     doorId = watchdog["doorId"];
+    doorAuthToken = strdup(watchdog["auth_token"]);
 
     return true;
 }

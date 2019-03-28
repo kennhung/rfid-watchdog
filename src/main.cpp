@@ -16,7 +16,10 @@
 
 #define DEBUG
 
+
 int doorId = 1;
+char *doorAuthToken = NULL;
+
 const char verTag[] = "beta 1.0";
 
 // io pins
