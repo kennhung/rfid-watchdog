@@ -166,19 +166,7 @@ void loop() {
     if (isWatcherConnected) {
         if (dogClient.available() > 0) {
             String readIn = dogClient.readStringUntil(';');
-            Log.verbose("[dogClient] %s\n", readIn.c_str());
-            DynamicJsonDocument readJson(1024);
-            deserializeJson(readJson, readIn);
-
-            int type = readJson["type"];
-            switch (type) {
-                case 2:
-                    String reply = "{'type':";
-                    reply += 5;
-                    reply += "};";
-                    dogClient.print(reply);
-                    break;
-            }
+            handleWatchDogServerRequest(readIn);
         }
     }
 }

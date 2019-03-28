@@ -45,3 +45,19 @@ bool checkAccess(const char* uid, int door) {
 
     return replyJson["open"];
 }
+
+void handleWatchDogServerRequest(String readIn) {
+    Log.verbose("[dogClient] %s\n", readIn.c_str());
+    DynamicJsonDocument readJson(1024);
+    deserializeJson(readJson, readIn);
+
+    int type = readJson["type"];
+    switch (type) {
+        case W_PING:
+            String reply = "{'type':";
+            reply += W_PONG;
+            reply += "};";
+            break;
+    }
+    dogClient.print(reply);
+}
