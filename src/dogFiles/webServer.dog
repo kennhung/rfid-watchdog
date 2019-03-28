@@ -29,19 +29,24 @@ void ICACHE_FLASH_ATTR setupWebServer() {
     });
 
     server.on("/config/save", HTTP_POST, [](AsyncWebServerRequest *req) {
-        if (req->hasParam("wifiMode", true)) {
-            Serial.println(req->getParam("wifiMode", true)->value());
-        }
-    });
-
-    server.on("/post", HTTP_POST, [](AsyncWebServerRequest *request) {
-        String message;
-        if (request->hasParam("message", true)) {
-            message = request->getParam("message", true)->value();
+        if (req->hasParam("config", true)) {
+            String configStr = req->getParam("config", true)->value();
+            File f = SPIFFS.open("/config.json", "w+");
+            if (f) {
+                int len = configStr.length();
+                for (int i = 0; i < len; i++) {
+                    f.print(configStr.c_str()[i]);
+                }
+                f.close();
+                Log.notice("Config stored in the SPIFFS %d bytes\n", len);
+                req->send(200, "text/plain", "Config saved!");
+                shouldReboot = true;
+            } else {
+                req->send(500, "text/plain", "Failed to open config file");
+            }
         } else {
-            message = "No message sent";
+             req->send(400);
         }
-        request->send(200, "text/plain", "Hello, POST: " + message);
     });
 
     server.on("/index.html", HTTP_GET, [](AsyncWebServerRequest *request) {

@@ -16,7 +16,7 @@
 
 #define DEBUG
 
-const int doorId = 1;
+int doorId = 1;
 const char verTag[] = "beta 1.0";
 
 // io pins
@@ -45,6 +45,7 @@ bool isWatcherConnected = false;
 bool activateRelay = false;
 bool isNTPInited = false;
 bool shouldReboot = false;
+bool configSuccess = false;
 
 unsigned long autoRestartIntervalSeconds = 0;
 unsigned long wifiTimeout = 0;
@@ -58,12 +59,14 @@ unsigned long uptime = 0;
 unsigned long cooldown = 0;
 unsigned long watchercooldown = 0;
 unsigned long relayActiveMillis = 0;
+unsigned long relayActiveTime = 3500;
 unsigned long wifiCheckCooldown = 0;
 
 int connectedStationCount = 0;
 int timeZone;
 
-unsigned long relayActiveTime = 3500;
+char *watchdogServer = NULL;
+int watchdogPort = 6083;
 
 #include "dogFiles/control.dog"
 #include "dogFiles/watcher.dog"
@@ -100,7 +103,8 @@ void setup() {
         syncEventTriggered = true;
     });
 
-    if (!loadConfig()) {
+    configSuccess = loadConfig();
+    if (!configSuccess) {
         fallbacktoAPMode();
     }
 
@@ -118,7 +122,7 @@ void loop() {
         rfidloop();
     }
 
-    if (currentMillis >= watchercooldown && !inAPMode) {
+    if (currentMillis >= watchercooldown && configSuccess) {
         updateWatcherConn();
     }
 

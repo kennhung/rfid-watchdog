@@ -62,7 +62,7 @@ void ICACHE_FLASH_ATTR fallbacktoAPMode() {
 
     char ssid[15];
     sprintf(ssid, "ESP-RFID-%02x%02x%02x", macAddr[3], macAddr[4], macAddr[5]);
-    
+
     WiFi.mode(WIFI_AP);
     bool success;
     success = WiFi.softAP(ssid);
@@ -75,7 +75,7 @@ void ICACHE_FLASH_ATTR fallbacktoAPMode() {
 bool ICACHE_FLASH_ATTR connectSTA(const char *ssid, const char *password) {
     WiFi.mode(WIFI_STA);
     WiFi.begin(ssid, password, 0);
-    inStationMode = true;
+
     // TODO add bssid
     Log.notice("[WIFI] Trying to connect WiFi: %s", ssid);
     unsigned long now = millis();
@@ -90,6 +90,10 @@ bool ICACHE_FLASH_ATTR connectSTA(const char *ssid, const char *password) {
 #endif
     } while (millis() - now < timeout * 1000);
 
+#ifdef DEBUG
+    Serial.println();
+#endif
+
     if (WiFi.status() == WL_CONNECTED) {
         Log.notice("[WIFI] Client IP address: %s\n",
                    WiFi.localIP().toString().c_str());
@@ -98,7 +102,7 @@ bool ICACHE_FLASH_ATTR connectSTA(const char *ssid, const char *password) {
 
         String data = ssid;
         data += " " + WiFi.localIP().toString();
-        // writeEvent("INFO", "wifi", "WiFi is connected", data);
+        inStationMode = true;
         return true;
     } else {
         Log.error("[WIFI] Couldn't connect in time\n");

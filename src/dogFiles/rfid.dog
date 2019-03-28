@@ -17,7 +17,7 @@ void ShowMFRC522ReaderDetails() {
     if ((v == 0x00) || (v == 0xFF)) {
         Log.error(
             "[RFID] Communication failure, check if MFRC522 properly "
-            "\"connected\"");
+            "connected\n");
     }
 }
 

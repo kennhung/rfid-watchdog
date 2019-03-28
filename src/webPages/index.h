@@ -7,18 +7,8 @@ const char index_html[] PROGMEM = R"=====(
 
 <BODY>
     <form action="/config/save" method="POST">
-        <h1>Network settings</h1>
-        Wifi Mode: <br>
-        <input type="radio" name="wifiMode" value="0">Station <br>
-        <input type="radio" name="wifiMode" value="1">AP <br>
-        <h2>Station</h2>
-        SSID: <input name="statSSID"> <br>
-        Password: <input name="statPass"> <br>
-        <h2>AP Mode</h2>
-        SSID: <input name="apSSID"> <br>
-        Password: <input name="apPass"> <br>
-        <h1>Watchdog server settings</h1>
-        Server IP: <input name="watchdogServerIP"> <br>
+        <h1>Config</h1>
+        <textarea id="configInput" name="config"></textarea>
         <hr>
         <button type="submit">Save</button>
     </form>
@@ -28,8 +18,9 @@ const char index_html[] PROGMEM = R"=====(
 
         req.open("GET", "/config/get");
         req.onload = () => {
-            
+            document.getElementById("configInput").appendChild(document.createTextNode(req.responseText))
         };
+        req.send();
     </script>
 
 </BODY>

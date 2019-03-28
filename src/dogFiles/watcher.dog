@@ -12,7 +12,7 @@ void updateWatcherConn(void) {
     watchercooldown = millis() + 5000;
     isWatcherConnected = dogClient.connected();
     if (!isWatcherConnected) {
-        isWatcherConnected = connWatcher("192.168.1.4", 6083);
+        isWatcherConnected = connWatcher(watchdogServer, watchdogPort);
     }
 }
 

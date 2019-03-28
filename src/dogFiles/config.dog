@@ -23,6 +23,7 @@ bool loadConfig(void) {
     JsonObject hardware = json["hardware"];
     JsonObject general = json["general"];
     JsonObject ntp = json["ntp"];
+    JsonObject watchdog = json["watchdog"];
 
     if (hardware.containsKey("wifipin")) {
         wifipin = hardware["wifipin"];
@@ -37,8 +38,12 @@ bool loadConfig(void) {
     }
 
     // set up door relay
-    relayPin = hardware["relayPin"];
+    relayPin = hardware["rpin"];
     relayType = hardware["rtype"];
+    if (hardware.containsKey("rtime")) {
+        relayActiveTime = hardware["rtime"];
+    }
+    
     pinMode(relayPin, OUTPUT);
     digitalWrite(relayPin, !relayType);
 
@@ -56,7 +61,9 @@ bool loadConfig(void) {
     // MDNS.addService("http", "tcp", 80);
 
     // set up rfid part
-    setupMFRC522Reader(15, 112);
+    int ssPing = hardware["sspin"];
+    int rfidGain = hardware["rfidgain"];
+    setupMFRC522Reader(ssPing, rfidGain);
 
     const char *ssid = network["ssid"];
     const char *password = network["pswd"];
@@ -84,6 +91,10 @@ bool loadConfig(void) {
     const char *ntpserver = ntp["server"];
     int ntpinter = ntp["interval"];
     timeZone = ntp["timezone"];
+    
+    watchdogServer = strdup(watchdog["server"]);
+    watchdogPort = watchdog["port"];
+    doorId = watchdog["doorId"];
 
     return true;
 }
