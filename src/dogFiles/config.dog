@@ -50,6 +50,11 @@ bool loadConfig(void) {
     deviceHostname = strdup(general["hostnm"]);
     WiFi.hostname(deviceHostname);
 
+    // if (!MDNS.begin(deviceHostname)) {
+    //     Log.warning("Error setting up MDNS responder!");
+    // }
+    // MDNS.addService("http", "tcp", 80);
+
     // set up rfid part
     setupMFRC522Reader(15, 112);
 

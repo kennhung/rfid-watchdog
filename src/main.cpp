@@ -7,6 +7,7 @@
 #include <SPI.h>
 #include <Wire.h>
 #include <stdlib.h>
+#include <ESPAsyncWebServer.h>
 
 #include <LiquidCrystal_I2C.h>
 #include <MFRC522.h>
@@ -33,6 +34,8 @@ WiFiClient dogClient;
 
 boolean syncEventTriggered = false;  // True if a time even has been triggered
 NTPSyncEvent_t ntpEvent;             // Last triggered event
+
+AsyncWebServer server(80);
 
 // Variables for whole scope
 bool isWifiConnected = false;
@@ -68,8 +71,8 @@ unsigned long relayActiveTime = 3500;
 #include "dogFiles/rfid.dog"
 #include "dogFiles/utils.dog"
 #include "dogFiles/wifi.dog"
-
 #include "dogFiles/config.dog"
+#include "dogFiles/webServer.dog"
 
 void setup() {
     Serial.begin(9600);
@@ -100,6 +103,8 @@ void setup() {
     if (!loadConfig()) {
         fallbacktoAPMode();
     }
+
+    setupWebServer();
 }
 
 void loop() {

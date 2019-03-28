@@ -1,0 +1,55 @@
+#include "webPages/index.h"
+
+void ICACHE_FLASH_ATTR setupWebServer() {
+    server.onNotFound([](AsyncWebServerRequest *request) {
+        AsyncWebServerResponse *response =
+            request->beginResponse(404, "text/plain", "Not found");
+        request->send(response);
+    });
+
+    server.on("/config/get", HTTP_GET, [](AsyncWebServerRequest *req) {
+        File configFile = SPIFFS.open("/config.json", "r");
+
+        if (configFile) {
+            size_t size = configFile.size();
+            std::unique_ptr<char[]> buf(new char[size]);
+            configFile.readBytes(buf.get(), size);
+            DynamicJsonDocument json(1024);
+            DeserializationError jsonerror = deserializeJson(json, buf.get());
+            if (jsonerror) {
+                req->send(500, "text/plain", "jsonerror");
+            } else {
+                String out = "";
+                serializeJson(json, out);
+                req->send(200, "application/json", out);
+            }
+        } else {
+            req->send(500, "text/plain", "Failed to open config file");
+        }
+    });
+
+    server.on("/config/save", HTTP_POST, [](AsyncWebServerRequest *req) {
+        if (req->hasParam("wifiMode", true)) {
+            Serial.println(req->getParam("wifiMode", true)->value());
+        }
+    });
+
+    server.on("/post", HTTP_POST, [](AsyncWebServerRequest *request) {
+        String message;
+        if (request->hasParam("message", true)) {
+            message = request->getParam("message", true)->value();
+        } else {
+            message = "No message sent";
+        }
+        request->send(200, "text/plain", "Hello, POST: " + message);
+    });
+
+    server.on("/index.html", HTTP_GET, [](AsyncWebServerRequest *request) {
+        AsyncWebServerResponse *response =
+            request->beginResponse_P(200, "text/html", index_html);
+        request->send(response);
+    });
+
+    server.rewrite("/", "/index.html");
+    server.begin();
+}
