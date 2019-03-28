@@ -49,7 +49,7 @@ bool configSuccess = false;
 
 unsigned long autoRestartIntervalSeconds = 0;
 unsigned long wifiTimeout = 0;
-char* deviceHostname = NULL;
+char *deviceHostname = NULL;
 
 unsigned long currentMillis = 0;
 unsigned long prevMillis = 0;
@@ -63,7 +63,10 @@ unsigned long relayActiveTime = 3500;
 unsigned long wifiCheckCooldown = 0;
 
 int connectedStationCount = 0;
-int timeZone;
+
+int ntpInterval = 60;
+int timeZone = 0;
+char *ntpserver = NULL;
 
 char *watchdogServer = NULL;
 int watchdogPort = 6083;
@@ -83,7 +86,7 @@ void setup() {
 #ifdef DEBUG
         Log.begin(LOG_LEVEL_VERBOSE, &Serial);
 #else
-        Log.begin(LOG_LEVEL_SILENT, &Serial);
+        Log.begin(LOG_LEVEL_WARNING, &Serial);
 #endif
     }
     Log.notice("[BOOT] wifi-watchdog %s\n", verTag);
@@ -114,7 +117,7 @@ void setup() {
 void loop() {
     currentMillis = millis();
     deltaTime = currentMillis - prevMillis;
-    prevMillis = currentMillis; 
+    prevMillis = currentMillis;
 
     uptime = millis() / 1000;
 
@@ -136,8 +139,12 @@ void loop() {
 
     if (isWifiConnected && !isNTPInited) {
         isNTPInited = true;
-        NTP.begin("pool.ntp.org", timeZone, true, 0);
-        NTP.setInterval(63);
+        if (ntpserver != NULL) {
+            NTP.begin(ntpserver, timeZone, true, 0);
+            NTP.setInterval(ntpInterval);
+        } else {
+            Log.error("[NTP] server address is NULL!!\n");
+        }
     }
 
     if (autoRestartIntervalSeconds > 0 &&
@@ -146,7 +153,8 @@ void loop() {
     }
 
     if (shouldReboot) {
-        Log.notice("[sys] System is going to reboot");
+        Log.notice("[sys] System is going to reboot\n");
+        delay(1000);
         ESP.restart();
     }
 

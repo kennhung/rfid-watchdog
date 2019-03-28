@@ -1,12 +1,12 @@
-void processSyncEvent (NTPSyncEvent_t ntpEvent) {
+void processSyncEvent(NTPSyncEvent_t ntpEvent) {
     if (ntpEvent) {
-        Serial.print ("Time Sync error: ");
-        if (ntpEvent == noResponse)
-            Serial.println ("NTP server not reachable");
-        else if (ntpEvent == invalidAddress)
-            Serial.println ("Invalid NTP server address");
+        String timeSyncErr = "";
+
+        if (ntpEvent == noResponse) timeSyncErr = "NTP server not reachable";
+        else if (ntpEvent == invalidAddress) timeSyncErr = "Invalid NTP server address";
+        Log.error("[NTP] Time Sync error: %s\n", timeSyncErr.c_str());
     } else {
-        Serial.print ("Got NTP time: ");
-        Serial.println (NTP.getTimeDateString (NTP.getLastNTPSync ()));
+        Log.trace("[NTP] Got NTP time: %s\n",
+                    NTP.getTimeDateString(NTP.getLastNTPSync()).c_str());
     }
 }

@@ -12,7 +12,7 @@ void ShowMFRC522ReaderDetails() {
     } else {
         vers = " (unknow)";
     }
-    Log.verbose("[INFO] MFRC522 Version: 0x%x %s\n", v, vers.c_str());
+    Log.trace("[RFID] MFRC522 Version: 0x%x %s\n", v, vers.c_str());
     // When 0x00 or 0xFF is returned, communication probably failed
     if ((v == 0x00) || (v == 0xFF)) {
         Log.error(
@@ -26,7 +26,7 @@ void setupMFRC522Reader(int rfidss, int rfidgain) {
     mfrc522.PCD_Init(rfidss, UINT8_MAX);
 
     mfrc522.PCD_SetAntennaGain(rfidgain);
-    Log.notice("[INFO] RFID SS_PIN: %u and Gain Factor: %u\n", rfidss,
+    Log.notice("[RFID] RFID SS_PIN: %u and Gain Factor: %u\n", rfidss,
                rfidgain);
 
     ShowMFRC522ReaderDetails();

@@ -88,10 +88,10 @@ bool loadConfig(void) {
         return false;
     }
 
-    const char *ntpserver = ntp["server"];
-    int ntpinter = ntp["interval"];
+    ntpserver = strdup(ntp["server"]);
+    ntpInterval = ntp["interval"];
     timeZone = ntp["timezone"];
-    
+
     watchdogServer = strdup(watchdog["server"]);
     watchdogPort = watchdog["port"];
     doorId = watchdog["doorId"];
