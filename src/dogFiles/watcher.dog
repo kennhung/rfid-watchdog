@@ -52,12 +52,20 @@ void handleWatchDogServerRequest(String readIn) {
     deserializeJson(readJson, readIn);
 
     int type = readJson["type"];
+
+    int replyType;
+    String replyMsg = "";
+
     switch (type) {
         case W_PING:
-            String reply = "{'type':";
-            reply += W_PONG;
-            reply += "};";
+            replyType = W_PONG;
             break;
     }
+
+    String reply = "{type:";
+    reply += replyType;
+    reply +=  ", message: \"";
+    reply += replyMsg;
+    reply +=  + "\"};"; 
     dogClient.print(reply);
 }
