@@ -1,11 +1,13 @@
 void processSyncEvent(NTPSyncEvent_t ntpEvent) {
     if (ntpEvent) {
+        isNTPConnected = false;
         String timeSyncErr = "";
 
         if (ntpEvent == noResponse) timeSyncErr = "NTP server not reachable";
         else if (ntpEvent == invalidAddress) timeSyncErr = "Invalid NTP server address";
         Log.error("[NTP] Time Sync error: %s\n", timeSyncErr.c_str());
     } else {
+        isNTPConnected = true;
         Log.trace("[NTP] Got NTP time: %s\n",
                     NTP.getTimeDateString(NTP.getLastNTPSync()).c_str());
     }

@@ -1,4 +1,11 @@
 #include "webPages/index.h"
+#include "webPages/config.h"
+#include "webPages/cache.h"
+
+void handleAuth(AsyncWebServerRequest *req){
+    if (!req->authenticate("root", adminPsw))
+            return req->requestAuthentication();
+}
 
 void ICACHE_FLASH_ATTR setupWebServer() {
     server.onNotFound([](AsyncWebServerRequest *request) {
@@ -41,17 +48,38 @@ void ICACHE_FLASH_ATTR setupWebServer() {
                 Log.notice("Config stored in the SPIFFS %d bytes\n", len);
                 req->send(200, "text/plain", "Config saved!");
                 shouldReboot = true;
+                req->redirect("/");
             } else {
                 req->send(500, "text/plain", "Failed to open config file");
             }
         } else {
-             req->send(400);
+            req->send(400);
         }
     });
 
+    server.on("/info/version", HTTP_GET, [](AsyncWebServerRequest *req){
+        handleAuth(req);
+        req->send(200, "text/plain", verTag);
+    });
+
     server.on("/index.html", HTTP_GET, [](AsyncWebServerRequest *request) {
+        handleAuth(request);
         AsyncWebServerResponse *response =
             request->beginResponse_P(200, "text/html", index_html);
+        request->send(response);
+    });
+
+    server.on("/config.html", HTTP_GET, [](AsyncWebServerRequest *request) {
+        handleAuth(request);
+        AsyncWebServerResponse *response =
+            request->beginResponse_P(200, "text/html", config_html);
+        request->send(response);
+    });
+
+    server.on("/cache.html", HTTP_GET, [](AsyncWebServerRequest *request) {
+        handleAuth(request);
+        AsyncWebServerResponse *response =
+            request->beginResponse_P(200, "text/html", cache_html);
         request->send(response);
     });
 

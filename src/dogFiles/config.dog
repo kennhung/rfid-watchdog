@@ -25,6 +25,8 @@ bool loadConfig(void) {
     JsonObject ntp = json["ntp"];
     JsonObject watchdog = json["watchdog"];
 
+    adminPsw = strdup(general["pswd"]);
+
     if (hardware.containsKey("wifipin")) {
         wifipin = hardware["wifipin"];
         if (wifipin != 255) {

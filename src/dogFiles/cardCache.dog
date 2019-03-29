@@ -5,7 +5,7 @@ void saveCache(const char* uid) {
     path += uid;
     File uidFile = SPIFFS.open(uid, "w");
     if (uidFile) {
-        uidFile.printf("%d", NTP.getTime());
+        uidFile.printf("%d", (isNTPConnected? NTP.getTime():0));
         uidFile.close();
     } else {
         Log.error("[Cache] Can't save uid cache %s", uid);

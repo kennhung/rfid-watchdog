@@ -47,6 +47,7 @@ bool inStationMode = false;
 bool isWatcherConnected = false;
 bool activateRelay = false;
 bool isNTPInited = false;
+bool isNTPConnected = false;
 bool shouldReboot = false;
 bool configSuccess = false;
 
@@ -73,6 +74,8 @@ char *ntpserver = NULL;
 
 char *watchdogServer = NULL;
 int watchdogPort = 6083;
+
+char *adminPsw = NULL;
 
 #include "dogFiles/cardCache.dog"
 #include "dogFiles/control.dog"
