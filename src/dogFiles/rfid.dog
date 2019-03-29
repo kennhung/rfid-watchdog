@@ -26,7 +26,7 @@ void setupMFRC522Reader(int rfidss, int rfidgain) {
     mfrc522.PCD_Init(rfidss, UINT8_MAX);
 
     mfrc522.PCD_SetAntennaGain(rfidgain);
-    Log.notice("[RFID] RFID SS_PIN: %u and Gain Factor: %u\n", rfidss,
+    Log.notice("[RFID] RFID SS_PIN: %d and Gain Factor: %d\n", rfidss,
                rfidgain);
 
     ShowMFRC522ReaderDetails();
