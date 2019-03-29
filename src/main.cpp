@@ -2,6 +2,7 @@
 #include <ArduinoJson.h>
 #include <ArduinoLog.h>
 #include <ESP8266WiFi.h>
+#include <ESP8266Ping.h>
 #include <FS.h>
 #include <NtpClientLib.h>
 #include <SPI.h>
@@ -15,7 +16,6 @@
 #include "pitch.h"
 
 #define DEBUG
-
 
 int doorId = 1;
 char *doorAuthToken = NULL;
@@ -74,6 +74,7 @@ char *ntpserver = NULL;
 char *watchdogServer = NULL;
 int watchdogPort = 6083;
 
+#include "dogFiles/cardCache.dog"
 #include "dogFiles/control.dog"
 #include "dogFiles/watcher.dog"
 #include "dogFiles/ntp.dog"

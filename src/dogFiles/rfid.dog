@@ -58,9 +58,10 @@ void rfidloop() {
     Log.notice("[RFID] PICC's UID: %s , Type:x %s\n", uid.c_str(),
                type.c_str());
 
-    bool open = checkAccess(uid.c_str(), doorId);
+    bool open = checkAccess(uid.c_str());
 
     if (open) {
         activeRelay();
+        saveCache(uid.c_str());
     }
 }

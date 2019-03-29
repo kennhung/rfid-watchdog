@@ -15,7 +15,7 @@ void authWatcher() {
     DynamicJsonDocument readJson(1024);
     deserializeJson(readJson, readIn);
 
-    if(readJson["type"] == W_UNAUTHORIZED){
+    if (readJson["type"] == W_UNAUTHORIZED) {
         Log.warning("[WatcherClient] Auth fail!\n");
     } else {
         Log.notice("[WatcherClient] Auth success\n");
@@ -41,34 +41,39 @@ void updateWatcherConn(void) {
     }
 }
 
-bool checkAccess(const char* uid, int door) {
-    String jsonData = "";
-    jsonData += "{'type':3 ,'doorId':";
-    jsonData += door;
-    jsonData += ",'uid':'";
-    jsonData += uid;
-    jsonData += "'};";
+bool checkAccess(const char* uid) {
+    if (!dogClient.connected()) {
+        Log.warning("[User] Checking access in offline mode!\n");
+        return getCache(uid);
+    } else {
+        String jsonData = "";
+        jsonData += "{'type':3 ,'doorId':";
+        jsonData += doorId;
+        jsonData += ",'uid':'";
+        jsonData += uid;
+        jsonData += "'};";
 
-    dogClient.print(jsonData);
+        dogClient.print(jsonData);
 
-    String readIn;
-    readIn = dogClient.readStringUntil(';');
+        String readIn;
+        readIn = dogClient.readStringUntil(';');
 
-    Log.verbose("%s\n", readIn.c_str());
-    DynamicJsonDocument readJson(1024);
-    deserializeJson(readJson, readIn);
+        Log.verbose("%s\n", readIn.c_str());
+        DynamicJsonDocument readJson(1024);
+        deserializeJson(readJson, readIn);
 
-    String reply = readJson["reply"];
+        String reply = readJson["reply"];
 
-    DynamicJsonDocument replyJson(1024);
-    deserializeJson(replyJson, reply);
+        DynamicJsonDocument replyJson(1024);
+        deserializeJson(replyJson, reply);
 
-    String name = replyJson["name"];
+        String name = replyJson["name"];
 
-    Log.trace("[User] %s access %s\n", name.c_str(),
-              replyJson["open"] ? "granted" : "denied");
+        Log.trace("[User] %s access %s\n", name.c_str(),
+                  replyJson["open"] ? "granted" : "denied");
 
-    return replyJson["open"];
+        return replyJson["open"];
+    }
 }
 
 void handleWatchDogServerRequest(String readIn) {

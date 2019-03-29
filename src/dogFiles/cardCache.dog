@@ -1,0 +1,34 @@
+#define cacheDirPath "/uid/";
+
+void saveCache(const char* uid) {
+    String path = cacheDirPath;
+    path += uid;
+    File uidFile = SPIFFS.open(uid, "w");
+    if (uidFile) {
+        uidFile.printf("%d", NTP.getTime());
+        uidFile.close();
+    } else {
+        Log.error("[Cache] Can't save uid cache %s", uid);
+    }
+}
+
+bool getCache(const char* uid) {
+    String path = cacheDirPath;
+    path += uid;
+    File uidFile = SPIFFS.open(uid, "r");
+    if (uidFile) {
+        size_t size = uidFile.size();
+        std::unique_ptr<char[]> buf(new char[size]);
+        uidFile.readBytes(buf.get(), size);
+        Log.verbose("[Cache] %s\n",buf.get());
+        uidFile.close();
+        return true;
+    } else {
+        Log.trace("[Cache] Can't found cache for %s", uid);
+    }
+    return false;
+}
+
+// JsonArray getCacheList(){
+
+// }
