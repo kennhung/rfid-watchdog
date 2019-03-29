@@ -75,7 +75,7 @@ char *ntpserver = NULL;
 char *watchdogServer = NULL;
 int watchdogPort = 6083;
 
-char *adminPsw = NULL;
+char *adminPsw = "admin";
 
 #include "dogFiles/cardCache.dog"
 #include "dogFiles/control.dog"

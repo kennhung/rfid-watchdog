@@ -23,6 +23,7 @@ void ICACHE_FLASH_ATTR setupWebServer() {
             configFile.readBytes(buf.get(), size);
             DynamicJsonDocument json(1024);
             DeserializationError jsonerror = deserializeJson(json, buf.get());
+            configFile.close();
             if (jsonerror) {
                 req->send(500, "text/plain", "jsonerror");
             } else {
@@ -60,6 +61,11 @@ void ICACHE_FLASH_ATTR setupWebServer() {
     server.on("/info/version", HTTP_GET, [](AsyncWebServerRequest *req){
         handleAuth(req);
         req->send(200, "text/plain", verTag);
+    });
+
+    server.on("/cache/list", HTTP_GET, [](AsyncWebServerRequest *req){
+        handleAuth(req);
+        getCacheList();
     });
 
     server.on("/index.html", HTTP_GET, [](AsyncWebServerRequest *request) {

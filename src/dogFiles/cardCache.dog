@@ -1,11 +1,13 @@
-#define cacheDirPath "/uid/";
+#define cacheDirPath "/uid";
 
 void saveCache(const char* uid) {
     String path = cacheDirPath;
+    path += "/";
     path += uid;
+    path += ".uid";
     File uidFile = SPIFFS.open(uid, "w");
     if (uidFile) {
-        uidFile.printf("%d", (isNTPConnected? NTP.getTime():0));
+        uidFile.printf("%s", uid);
         uidFile.close();
     } else {
         Log.error("[Cache] Can't save uid cache %s", uid);
@@ -14,13 +16,15 @@ void saveCache(const char* uid) {
 
 bool getCache(const char* uid) {
     String path = cacheDirPath;
+    path += "/";
     path += uid;
+    path += ".uid";
     File uidFile = SPIFFS.open(uid, "r");
     if (uidFile) {
         size_t size = uidFile.size();
         std::unique_ptr<char[]> buf(new char[size]);
         uidFile.readBytes(buf.get(), size);
-        Log.verbose("[Cache] %s\n",buf.get());
+        Log.verbose("[Cache] %s\n", buf.get());
         uidFile.close();
         return true;
     } else {
@@ -29,6 +33,18 @@ bool getCache(const char* uid) {
     return false;
 }
 
-// JsonArray getCacheList(){
+JsonArray getCacheList() {
+    DynamicJsonDocument doc(1024);
+    JsonArray caches = doc.to<JsonArray>();
 
-// }
+    String path = cacheDirPath;
+    Dir dir = SPIFFS.openDir(path);
+    Serial.println(dir.fileSize());
+	while (dir.next()) {
+        String uid = dir.fileName();
+        Serial.println(uid);
+        caches.add(uid);
+    }
+
+    return caches;
+}

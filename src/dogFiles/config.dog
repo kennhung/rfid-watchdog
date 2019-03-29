@@ -15,8 +15,10 @@ bool loadConfig(void) {
         return false;
     }
 
+    configFile.close();
+
     Log.notice("Config file found");
-    // json.prettyPrintTo(Serial);
+    // // json.prettyPrintTo(Serial);
     Serial.println();
 
     JsonObject network = json["network"];
@@ -24,8 +26,11 @@ bool loadConfig(void) {
     JsonObject general = json["general"];
     JsonObject ntp = json["ntp"];
     JsonObject watchdog = json["watchdog"];
+    
 
-    adminPsw = strdup(general["pswd"]);
+    if(general.containsKey("pswd")){
+        adminPsw = strdup(general["pswd"]);
+    }
 
     if (hardware.containsKey("wifipin")) {
         wifipin = hardware["wifipin"];
@@ -51,9 +56,6 @@ bool loadConfig(void) {
 
     autoRestartIntervalSeconds = general["restart"];
     wifiTimeout = network["offtime"];
-    const char *bssidmac = network["bssid"];
-    byte bssid[6];
-    parseBytes(bssidmac, ':', bssid, 6, 16);
     deviceHostname = strdup(general["hostnm"]);
     WiFi.hostname(deviceHostname);
 
