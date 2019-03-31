@@ -1,11 +1,9 @@
-#define cacheDirPath "/uid";
+#define cacheDirPath "/P/";
 
 void saveCache(const char* uid) {
     String path = cacheDirPath;
-    path += "/";
     path += uid;
-    path += ".uid";
-    File uidFile = SPIFFS.open(uid, "w");
+    File uidFile = SPIFFS.open(path, "w");
     if (uidFile) {
         uidFile.printf("%s", uid);
         uidFile.close();
@@ -16,10 +14,8 @@ void saveCache(const char* uid) {
 
 bool getCache(const char* uid) {
     String path = cacheDirPath;
-    path += "/";
     path += uid;
-    path += ".uid";
-    File uidFile = SPIFFS.open(uid, "r");
+    File uidFile = SPIFFS.open(path, "r");
     if (uidFile) {
         size_t size = uidFile.size();
         std::unique_ptr<char[]> buf(new char[size]);
@@ -39,7 +35,6 @@ JsonArray getCacheList() {
 
     String path = cacheDirPath;
     Dir dir = SPIFFS.openDir(path);
-    Serial.println(dir.fileSize());
 	while (dir.next()) {
         String uid = dir.fileName();
         Serial.println(uid);
