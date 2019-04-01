@@ -2,9 +2,13 @@
 #include "webPages/config.h"
 #include "webPages/cache.h"
 
-void handleAuth(AsyncWebServerRequest *req){
-    if (!req->authenticate("root", adminPsw))
-            return req->requestAuthentication();
+bool handleAuth(AsyncWebServerRequest *req) {
+    if (!req->authenticate("root", adminPsw)) {
+        req->requestAuthentication();
+        return false;
+    } else {
+        return true;
+    }
 }
 
 void ICACHE_FLASH_ATTR setupWebServer() {
@@ -14,11 +18,9 @@ void ICACHE_FLASH_ATTR setupWebServer() {
         request->send(response);
     });
 
-
-
     server.on("/config/get", HTTP_GET, [](AsyncWebServerRequest *req) {
+        if (!handleAuth(req)) return;
         File configFile = SPIFFS.open("/config.json", "r");
-
         if (configFile) {
             size_t size = configFile.size();
             std::unique_ptr<char[]> buf(new char[size]);
@@ -39,6 +41,7 @@ void ICACHE_FLASH_ATTR setupWebServer() {
     });
 
     server.on("/config/save", HTTP_POST, [](AsyncWebServerRequest *req) {
+        if (!handleAuth(req)) return;
         if (req->hasParam("config", true)) {
             String configStr = req->getParam("config", true)->value();
             File f = SPIFFS.open("/config.json", "w+");
@@ -60,33 +63,33 @@ void ICACHE_FLASH_ATTR setupWebServer() {
         }
     });
 
-    server.on("/info/version", HTTP_GET, [](AsyncWebServerRequest *req){
-        handleAuth(req);
+    server.on("/info/version", HTTP_GET, [](AsyncWebServerRequest *req) {
+        if (!handleAuth(req)) return;
         req->send(200, "text/plain", verTag);
     });
 
-    server.on("/cache/list", HTTP_GET, [](AsyncWebServerRequest *req){
-        handleAuth(req);
+    server.on("/cache/list", HTTP_GET, [](AsyncWebServerRequest *req) {
+        if (!handleAuth(req)) return;
         String caches = getCacheList();
         req->send(200, "text/plain", caches);
     });
 
     server.on("/index.html", HTTP_GET, [](AsyncWebServerRequest *request) {
-        handleAuth(request);
+        if (!handleAuth(request)) return;
         AsyncWebServerResponse *response =
             request->beginResponse_P(200, "text/html", index_html);
         request->send(response);
     });
 
     server.on("/config.html", HTTP_GET, [](AsyncWebServerRequest *request) {
-        handleAuth(request);
+        if (!handleAuth(request)) return;
         AsyncWebServerResponse *response =
             request->beginResponse_P(200, "text/html", config_html);
         request->send(response);
     });
 
     server.on("/cache.html", HTTP_GET, [](AsyncWebServerRequest *request) {
-        handleAuth(request);
+        if (!handleAuth(request)) return;
         AsyncWebServerResponse *response =
             request->beginResponse_P(200, "text/html", cache_html);
         request->send(response);

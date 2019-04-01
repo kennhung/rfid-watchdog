@@ -15,10 +15,16 @@ const char cache_html[] PROGMEM = R"=====(
     <script>
         let req = new XMLHttpRequest();
 
-        req.open("GET", "/cache/get");
+        req.open("GET", "/cache/list");
         req.onload = () => {
             console.log(req.responseText);
-            document.getElementById("cacheList").appendChild();
+            const data = JSON.parse(req.responseText);
+            for (let i=0;i<data.length;i++) {
+                let uid = data[i];
+                let li = document.createElement("li");
+                li.appendChild(document.createTextNode(uid));
+                document.getElementById("cacheList").appendChild(li);
+            }
         };
         req.send();
     </script>
