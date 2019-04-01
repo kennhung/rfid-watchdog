@@ -14,6 +14,8 @@ void ICACHE_FLASH_ATTR setupWebServer() {
         request->send(response);
     });
 
+
+
     server.on("/config/get", HTTP_GET, [](AsyncWebServerRequest *req) {
         File configFile = SPIFFS.open("/config.json", "r");
 
@@ -65,7 +67,8 @@ void ICACHE_FLASH_ATTR setupWebServer() {
 
     server.on("/cache/list", HTTP_GET, [](AsyncWebServerRequest *req){
         handleAuth(req);
-        getCacheList();
+        String caches = getCacheList();
+        req->send(200, "text/plain", caches);
     });
 
     server.on("/index.html", HTTP_GET, [](AsyncWebServerRequest *request) {

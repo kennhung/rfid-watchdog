@@ -1,5 +1,11 @@
 #define cacheDirPath "/P/";
 
+String getCleanUID(String input){
+    String s = cacheDirPath;
+    input.remove(0, s.length());
+    return input;
+}
+
 void saveCache(const char* uid) {
     String path = cacheDirPath;
     path += uid;
@@ -29,17 +35,22 @@ bool getCache(const char* uid) {
     return false;
 }
 
-JsonArray getCacheList() {
-    DynamicJsonDocument doc(1024);
+String getCacheList() {
+    const size_t cap = JSON_ARRAY_SIZE(100);
+
+    StaticJsonDocument<cap> doc;
     JsonArray caches = doc.to<JsonArray>();
 
     String path = cacheDirPath;
     Dir dir = SPIFFS.openDir(path);
-	while (dir.next()) {
+    while (dir.next()) {
         String uid = dir.fileName();
-        Serial.println(uid);
+        uid = getCleanUID(uid);
         caches.add(uid);
     }
 
-    return caches;
+    String output = "";
+    serializeJson(caches, output);
+
+    return output;
 }

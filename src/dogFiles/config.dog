@@ -17,7 +17,7 @@ bool loadConfig(void) {
 
     configFile.close();
 
-    Log.notice("Config file found");
+    Log.notice("[Config] Config file found");
     // // json.prettyPrintTo(Serial);
     Serial.println();
 
